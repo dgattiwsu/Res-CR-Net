@@ -32,7 +32,8 @@ USAGE.
     
 4. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
         
-Submit any requests for information on usage, additional datasets, or modifications to:
+
+CONTACT.
 
 Domenico Gatti 
 
