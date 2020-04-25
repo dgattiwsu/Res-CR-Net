@@ -32,7 +32,13 @@ USAGE.
     
 4. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
         
-Submit any requests for additional information on usage, additional testing datasets, or modifications to:
+Submit any requests for information on usage, additional datasets, or modifications to:
 
-Domenico Gatti, Dept. Biochemistry, Microbiology, and Immunology, Wayne State University School of Medicine, 540 E. Canfield Avenue, Detroit, MI. Tel: 313-577-8645; E-mail: dgatti@med.wayne.edu; website: http://veloce.med.wayne.edu/~gatti/
+Domenico Gatti 
+
+Dept. Biochemistry, Microbiology, and Immunology, Wayne State University, Detroit, MI. 
+
+E-mail: dgatti@med.wayne.edu 
+
+website: http://veloce.med.wayne.edu/~gatti/
 
