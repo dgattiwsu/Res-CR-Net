@@ -18,7 +18,7 @@ Res-CR-Net is currently designed to work either with:
 
 2) a single thresholded grayscale mask/image (i.e., a mask with 3 classes would have the regions corresponding to the three categories thresholded at 0,128,255 values). In this case, gray scale masks are first converted to sparse categorical with each gray level corresponding to a different index (i.e., [0, 128, 255] goes to [0, 1, 2]). Then, pixels identified by indices are converted to one-hot vectors.
 
-3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of mask for each class 
+3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of masks for each class 
 
 A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0','msk1','msk2','msk3'. 
 
