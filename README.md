@@ -20,12 +20,19 @@ Res-CR-Net is currently designed to work either with:
 
 3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of masks for each class. 
 
-A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0','msk1','msk2','msk3' is provided for testing. 
+A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0', 'msk1', 'msk2', 'msk3' is provided for testing. 
 
 USAGE.
 
-    Edit MODULES/Constants.py (image size and type, mask type (GS or RGB) and names of the mask folders defining the classes , numer of residual blocks, kernel sizes, dilation rates, number of filters in both the conv blocks and the LSTM blocks, batch size for training and validation set, type of weights for the loss).
+    Edit MODULES/Constants.py (image size and type, mask type (GS or RGB) and names of the mask folders defining the classes , numer of residual blocks, kernel sizes, dilation rates, number of filters in both the conv blocks and the LSTM blocks, batch size for training and validation set, type of weights for the loss). This file is self-explanatory.
 
     Edit Res-CR-Net_train.py (epochs, steps/epoch, loss, metric)
 
     Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &"
+    
+    
+Please submit any requests for additional explanations on usage, additional testing datasets, or for modifications to:
+
+Domenico Gatti
+dgatti@med.wayne.edu
+
