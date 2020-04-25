@@ -14,13 +14,13 @@ A LeakyReLU activation is used throughout Res-CR-Net. After the last residual bl
 
 Res-CR-Net is currently designed to work either with: 
 
-1) a single rgb mask/image of 3 or 4 binary channels, corresponding to 3-4 classes 
+1) a single rgb mask/image of 3 or 4 binary channels, corresponding to 3-4 classes. 
 
 2) a single thresholded grayscale mask/image (i.e., a mask with 3 classes would have the regions corresponding to the three categories thresholded at 0,128,255 values). In this case, gray scale masks are first converted to sparse categorical with each gray level corresponding to a different index (i.e., [0, 128, 255] goes to [0, 1, 2]). Then, pixels identified by indices are converted to one-hot vectors.
 
-3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of masks for each class 
+3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of masks for each class. 
 
-A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0','msk1','msk2','msk3'. 
+A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0','msk1','msk2','msk3' is provided for testing. 
 
 USAGE.
 
@@ -28,4 +28,4 @@ USAGE.
 
     Edit Res-CR-Net_train.py (epochs, steps/epoch, loss, metric)
 
-    Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py"
+    Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &"
