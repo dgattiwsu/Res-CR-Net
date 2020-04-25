@@ -34,12 +34,5 @@ USAGE.
         
 Submit any requests for additional information on usage, additional testing datasets, or modifications to:
 
-Domenico Gatti
-NanoBioScience Institute
-Dept. Biochemistry, Microbiology, and Immunology 
-Wayne State University School of Medicine
-540 E. Canfield Avenue, Detroit, MI
-Tel: 313-577-8645
-E-mail: dgatti@med.wayne.edu
-website: http://veloce.med.wayne.edu/~gatti/
+Domenico Gatti, Dept. Biochemistry, Microbiology, and Immunology, Wayne State University School of Medicine, 540 E. Canfield Avenue, Detroit, MI. Tel: 313-577-8645; E-mail: dgatti@med.wayne.edu; website: http://veloce.med.wayne.edu/~gatti/
 
