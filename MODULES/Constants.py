@@ -21,15 +21,15 @@ def _Params():
     HEIGHT = 300
     WIDTH = 300
     
-    # IMG_COLOR_MODE ='rgb'
-    IMG_COLOR_MODE = 'grayscale'
+    IMG_COLOR_MODE ='rgb'
+    # IMG_COLOR_MODE = 'grayscale'
     
     if IMG_COLOR_MODE == 'rgb':
         CHANNELS = 3
     elif IMG_COLOR_MODE == 'grayscale':
         CHANNELS = 1
     
-    IMG_CLASS = 'img_gs'
+    IMG_CLASS = 'img'
     
     # Mask features
     # MSK_COLOR_MODE = 'rgb'
