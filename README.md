@@ -1,4 +1,4 @@
-# Res-CR-Net_v2.0
+# Res-CR-Net
 
 Res-CR-Net, a residual network with a novel architecture optimized for the semantic segmentation of microscopy images.
 
@@ -12,15 +12,19 @@ Res-CR-Net combines two types of residual blocks:
 
 A LeakyReLU activation is used throughout Res-CR-Net. After the last residual block a softmax activation layer is used to project the feature map into the desired segmentation.
 
-Res-CR-Net is currently designed to work either with rgb masks of 3 or 4 binary channels, corresponding to 3-4 classes, or with thresholded gray scale masks (i.e., a mask with 3 classes would have the regions corresponding to the three categories thresholded at 0,128,255 values). In this case, gray scale masks are first converted to sparse categorical with each gray level corresponding to a different index (i.e., [0, 128, 255] goes to [0, 1, 2]). Then, pixels identified by indices are converted to one-hot vectors. A Matlab wrapper is provided in the dataset folder as an example of how to convert a 3-channel rgb mask into a 3 levels 1-channel gray-scale mask.
+Res-CR-Net is currently designed to work either with: 
 
-A dataset of rgb images is provided for testing. GS masks are in the folder 'msk', RGB masks are in the folder 'msk3'.
+1) a single rgb mask/image of 3 or 4 binary channels, corresponding to 3-4 classes 
+
+2) a single thresholded grayscale mask/image (i.e., a mask with 3 classes would have the regions corresponding to the three categories thresholded at 0,128,255 values). In this case, gray scale masks are first converted to sparse categorical with each gray level corresponding to a different index (i.e., [0, 128, 255] goes to [0, 1, 2]). Then, pixels identified by indices are converted to one-hot vectors.
+
+3) multiple binary grayscale masks/image, each mask representing a different class. In this case there must be a different folder of mask for each class 
+
+A compressed dataset of rgb images and binary masks for 4 different classes in the folders 'msk0','msk1','msk2','msk3'. 
 
 USAGE.
 
-    Edit MODULES/Constants.py (image size and type, mask type (GS or RGB), numer of residual blocks, kernel sizes, dilation rates, batch size for training and validation set, type of weights for the loss).
-
-    Edit MODULES/Generators.py (mask directory for the data generator: msk or msk3)
+    Edit MODULES/Constants.py (image size and type, mask type (GS or RGB) and names of the mask folders defining the classes , numer of residual blocks, kernel sizes, dilation rates, number of filters in both the conv blocks and the LSTM blocks, batch size for training and validation set, type of weights for the loss).
 
     Edit Res-CR-Net_train.py (epochs, steps/epoch, loss, metric)
 
