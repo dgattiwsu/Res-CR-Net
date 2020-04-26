@@ -153,13 +153,13 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
    
 
-3. Uncompress the dataset folder. This folder represents also a template of how to organize the training and validation data for a run with Res-CR-Net. 
+4. Uncompress the dataset folder. This folder represents also a template of how to organize the training and validation data for a run with Res-CR-Net. 
 
 
-4. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
+5. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
 
 
-5. Optionally, use Res-CR-Net_predict.py to test different models that were saved in separate runs of Res-CR-Net_train.py. In this case the only thing you need to edit is the model number in the LOADING/COMPILATION section. For example: 
+6. Optionally, use Res-CR-Net_predict.py to test different models that were saved in separate runs of Res-CR-Net_train.py. In this case the only thing you need to edit is the model number in the LOADING/COMPILATION section. For example: 
 
    model_number = '2020-04-16_20_50'
    
