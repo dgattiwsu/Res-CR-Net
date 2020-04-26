@@ -169,7 +169,7 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
    
    then run as: "python Res-CR-Net_predict.py" 
 
-   _______________________________________________________________________________________________________
+  _______________________________________________________________________________________________________
 
 For additional information e-mail to:
 
