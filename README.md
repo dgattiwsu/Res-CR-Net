@@ -161,6 +161,7 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
 
    model_number = '2020-04-16_20_50'   
    load_saved = True
+   
    load_best = True
    
 then run as: "python Res-CR-Net_predict.py" 
