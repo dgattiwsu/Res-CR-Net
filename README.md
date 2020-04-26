@@ -24,7 +24,109 @@ A compressed dataset of rgb images and binary masks for 4 different classes in t
 
 USAGE.
 
-1. Edit MODULES/Constants.py (image size and type, mask type (GS or RGB) and names of the mask folders defining the classes , numer of residual blocks, kernel sizes, dilation rates, number of filters in both the conv blocks and the LSTM blocks, batch size for training and validation set, type of weights for the loss). This file is self-explanatory.
+1. Edit MODULES/Constants.py. This module contains all the parameters that shape the architecture of the network. Below is an example of the information required for this file:
+
+def _Params():
+
+    # IMAGE FEATURES ################################################# 
+    
+    # Target dimensions of the input images. The original image size 
+    # will be converted to the following height and width.
+    HEIGHT = 300
+    WIDTH = 300
+    
+    # Image type: 'rgb' or 'grayscale'
+    IMG_COLOR_MODE ='rgb'
+    
+    if IMG_COLOR_MODE == 'rgb':
+        CHANNELS = 3
+    elif IMG_COLOR_MODE == 'grayscale':
+        CHANNELS = 1
+    
+    # Name of the folder containing the input images
+    IMG_CLASS = 'img'
+    
+    # MASK FEATURES #################################################
+    
+    # Mask type: 'rgb', 'rgba', 'grayscale'
+    MSK_COLOR_MODE = 'grayscale'
+    
+    # Number of segmentation classes
+    NUM_CLASS = 4
+    
+    # Name or names of the folders containing the masks
+    CLASSES = ['msk0','msk1','msk2','msk3']
+    
+    # NETWORK FEATURES #############################################
+    
+    # Kernels size in the Convolutional blocks 
+    KS1 = (3,3) 
+    KS2 = (5,5)
+    KS3 = (7,7)
+   
+    # Dilation rate in the convolutional blocks
+    DL1 = (1,1)
+    DL2 = (3,3)
+    DL3 = (5,5)
+    
+    # Number of Convolutional block Filters
+    NF = 16
+    
+    # Number of LSTM block Filters
+    NFL = 1
+
+    # Number of Convolutional blocks
+    NR1 = 6
+    
+    # Number of LSTM blocks
+    NR2 = 1
+    
+    # Dropout rates: 
+    # DR1, dropout rates in the convolutional blocks (recommended 0.05) 
+    # DR2, dropout rates in the LSTM blocks (recommended 0.1)
+    DR1 = 0.05
+    DR2 = 0.1
+    
+    # Residual block mode: add, 'add', or concatenate, 'conc', different dilations
+    DIL_MODE = "conc"
+    
+    # Weight mode: 'contour' (recommended),  'volume', 'both' (also very good)
+    W_MODE = "contour"
+    
+    # Smoothing parameter in the loss function
+    # Recommended values: 1.0 for 'contour' and 'both' modes, 1e-5 for 
+    # 'volume' mode)
+    if W_MODE == "contour":
+        LS = 1
+    elif W_MODE == "both":
+        LS = 1        
+    elif W_MODE == "volume":
+        LS = 1e-5
+    
+    # Batch size for training and validation set
+    TRAIN_SIZE = 10
+    VAL_SIZE = 6
+    
+    return HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
+        KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
+        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS
+
+def _Paths():
+    TRAIN_IMG_PATH = 'dataset/train_local/images'
+    TRAIN_MSK_PATH = 'dataset/train_local/masks'
+    VAL_IMG_PATH = 'dataset/val_local/images'
+    VAL_MSK_PATH = 'dataset/val_local/masks'
+    TRAIN_MSK_CLASS = ['msk']
+    VAL_MSK_CLASS = ['msk']
+    return TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
+        VAL_MSK_PATH, VAL_MSK_CLASS
+
+def _Seeds():
+    TRAIN_SEED = 1
+    VAL_SEED = 2
+    return TRAIN_SEED, VAL_SEED
+    
+# In[2]
 
 2. Edit Res-CR-Net_train.py (epochs, steps/epoch, loss, metric)
     
