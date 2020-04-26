@@ -142,7 +142,8 @@ def _Seeds():
 4. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
         
 
-CONTACT.
+
+For any additional information send an e-mail to:
 
 Domenico Gatti 
 
