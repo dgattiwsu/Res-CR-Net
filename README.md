@@ -142,13 +142,13 @@ def _Seeds():
 
 3. Edit Res-CR-Net_train.py. The only thing to modify here are the number of epochs and steps in the TRAINING section. For example:
 
-epoch_num = 90
-train_steps = 30 # Number of batches called in each epoch
-val_steps = 1
+    epoch_num = 90
+    train_steps = 30 # Number of batches called in each epoch
+    val_steps = 1
 
 and the loss and metrics in the EVALUATION section. For example:
 
-model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
 
 
 3. Uncompress the dataset folder. This folder represents also a template of how to organize the training and validation data for a run with Res-CR-Net. 
