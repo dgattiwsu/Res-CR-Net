@@ -155,7 +155,15 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
 
 
 4. Train/validate Res-CR-Net with the provided dataset as: "python Res-CR-Net_train.py > log_file &". 
-        
+
+
+5. Optionally, use Res-CR-Net_predict.py to test different models that were saved in separate runs of Res-CR-Net_train.py. In this case the only thing you need to edit is the model number in the LOADING/COMPILATION section. For example: 
+
+   model_number = '2020-04-16_20_50'   
+   load_saved = True
+   load_best = True
+   
+then run as: "python Res-CR-Net_predict.py" 
 
 %
 
