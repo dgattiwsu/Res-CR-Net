@@ -146,7 +146,7 @@ def _Seeds():
    train_steps = 30 # Number of batches called in each epoch
    val_steps = 1
 
-and the loss and metrics in the EVALUATION section, if you want them to be consistent or different from those set in MODULES/Networks.py . For example:
+and the loss and metrics in the EVALUATION section, if you want them to be consistent or different from those set in MODULES/Networks.py. For example:
 
    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
    
