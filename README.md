@@ -127,7 +127,8 @@ def _Paths():
         VAL_MSK_PATH, VAL_MSK_CLASS
 
 def _Seeds():
-    # Seeds for the generators
+
+    # Seeds for the generators    
     TRAIN_SEED = 1
     VAL_SEED = 2
     
