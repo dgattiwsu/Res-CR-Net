@@ -143,7 +143,9 @@ def _Seeds():
 3. Edit Res-CR-Net_train.py. The only thing to modify here are the number of epochs and steps in the TRAINING section. For example:
 
    epoch_num = 90
+   
    train_steps = 30 # Number of batches called in each epoch
+   
    val_steps = 1
 
 and the loss and metrics in the EVALUATION section, if you want them to be consistent or different from those set in MODULES/Networks.py. For example:
@@ -159,7 +161,8 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
 
 5. Optionally, use Res-CR-Net_predict.py to test different models that were saved in separate runs of Res-CR-Net_train.py. In this case the only thing you need to edit is the model number in the LOADING/COMPILATION section. For example: 
 
-   model_number = '2020-04-16_20_50'   
+   model_number = '2020-04-16_20_50'
+   
    load_saved = True
    
    load_best = True
