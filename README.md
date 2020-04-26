@@ -25,7 +25,7 @@ A compressed dataset of rgb images and binary masks for 4 different classes in t
 USAGE.
 
 1. Edit MODULES/Constants.py. This module contains all the parameters that shape the architecture of the network. Below is an example of the information required for this file:
-
+  
 def _Params():
 
     # IMAGE FEATURES ################################################# 
@@ -112,21 +112,27 @@ def _Params():
         TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS
 
 def _Paths():
+
+    # Paths for training and validation images and masks 
     TRAIN_IMG_PATH = 'dataset/train_local/images'
     TRAIN_MSK_PATH = 'dataset/train_local/masks'
     VAL_IMG_PATH = 'dataset/val_local/images'
     VAL_MSK_PATH = 'dataset/val_local/masks'
+    
+    # The following two are currently not used (non need to change them)
     TRAIN_MSK_CLASS = ['msk']
     VAL_MSK_CLASS = ['msk']
+    
     return TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
         VAL_MSK_PATH, VAL_MSK_CLASS
 
 def _Seeds():
+    # Seeds for the generators
     TRAIN_SEED = 1
     VAL_SEED = 2
+    
     return TRAIN_SEED, VAL_SEED
     
-# In[2]
 
 2. Edit Res-CR-Net_train.py (epochs, steps/epoch, loss, metric)
     
