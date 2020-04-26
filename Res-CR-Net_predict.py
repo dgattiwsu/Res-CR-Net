@@ -15,7 +15,8 @@ import cv2
 
 # In[2]:
 
-from MODULES.Generators import train_generator, val_generator
+from MODULES.Generators import train_generator_1, val_generator_1
+from MODULES.Generators import train_generator_2, val_generator_2
 from MODULES.Networks import ResNet_Atrous
 from MODULES.Losses import dice_coeff
 from MODULES.Losses import tani_loss, tani_coeff, weighted_tani_coeff
@@ -67,14 +68,20 @@ if load_saved:
     
 # ### EVALUATION
 model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
-test_scores=model.evaluate(val_generator(),steps=1)  
+if len(CLASSES) == 1:
+    test_scores=model.evaluate(val_generator_1(),steps=1)
+elif len(CLASSES) > 1:
+    test_scores=model.evaluate(val_generator_2(),steps=1)    
 print('Validation score = ',test_scores)
-
 
 # In[6] 
 
 # ### OTHER METRICS
-x_val,y_val = next(val_generator())
+if len(CLASSES) == 1:
+    x_val,y_val = next(val_generator_1())
+elif len(CLASSES) > 1:
+    x_val,y_val = next(val_generator_2())
+
 y_true = y_val
 y_pred = model.predict(x_val)
 
