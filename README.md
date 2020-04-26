@@ -167,9 +167,9 @@ and the loss and metrics in the EVALUATION section, if you want them to be consi
    
    load_best = True
    
-then run as: "python Res-CR-Net_predict.py" 
+   then run as: "python Res-CR-Net_predict.py" 
 
-%
+   _______________________________________________________________________________________________________
 
 For additional information e-mail to:
 
