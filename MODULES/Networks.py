@@ -72,12 +72,65 @@ def ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
         model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
 
     return model
-    
+
 # In[4]:    
 
 # ### DENSE-RESNET-ATROUS
     
 def Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
+                   num_class=NUM_CLASS,
+                   ks1=KS1, ks2=KS2, ks3=KS3, 
+                   dl1=DL1, dl2=DL2, dl3=DL3,
+                   filters=NF,resblock1=NR1,
+                   r_filters=NFL, resblock2=NR2,
+                   dil_mode=DIL_MODE, 
+                   sp_dropout=DR1,re_dropout=DR2):
+
+#   tf.debugging.set_log_device_placement(True)
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+
+        inputs = Input(shape=input_shape)
+
+        for cycle in range(resblock1):
+            if cycle == 0:
+                d1 = stem_split_3k(inputs, filters, mode=dil_mode, 
+                                   kernel_size_1=ks1, kernel_size_2=ks2, kernel_size_3=ks3, 
+                                   dilation_1=dl1, dilation_2=dl2, dilation_3=dl3)
+            else:
+                if cycle == 1:                        
+                    d2 = residual_block_split_3k(d1, filters, mode=dil_mode, 
+                                         kernel_size_1=ks1, kernel_size_2=ks2, kernel_size_3=ks3, 
+                                         dilation_1=dl1, dilation_2=dl2, dilation_3=dl3)
+                    d2 = SpatialDropout2D(sp_dropout)(d2)
+                    dsum = Add()([d1,d2])                    
+                else:
+                    d2 = residual_block_split_3k(d2, filters, mode=dil_mode, 
+                                         kernel_size_1=ks1, kernel_size_2=ks2, kernel_size_3=ks3, 
+                                         dilation_1=dl1, dilation_2=dl2, dilation_3=dl3)                        
+                    d2 = SpatialDropout2D(sp_dropout)(d2)                
+                    d2 += dsum
+                    dsum = d2 + 0                                                          
+
+        for cycle in range(resblock2):
+            if cycle == 0:
+                d3 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout)
+            else:
+                d3 = residual_convLSTM2D_block(d3,r_filters,num_class,rd=re_dropout)  
+                                 
+        outputs = Activation("softmax", name = 'softmax')(d3)
+
+        model = Model(inputs, outputs, name='Res-CRD-Net')
+
+        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+
+    return model
+      
+# In[5]:    
+
+# ### VERY-DENSE-RESNET-ATROUS (6 CONV_RES_BLOCKS, 1 LSTM_RES_BLOCK)
+    
+def Very_Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
                    num_class=NUM_CLASS,
                    ks1=KS1, ks2=KS2, ks3=KS3, 
                    dl1=DL1, dl2=DL2, dl3=DL3,
