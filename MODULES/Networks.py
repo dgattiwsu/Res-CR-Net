@@ -66,6 +66,9 @@ def ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
                 d2 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout) 
       
         outputs = Activation("softmax", name = 'softmax')(d2)
+       
+        # Optionally use sigmoid activation.
+        # outputs = Activation("sigmoid", name = 'sigmoid')(d2)
 
         model = Model(inputs, outputs, name='Res-CR-Net')
 
@@ -119,6 +122,9 @@ def Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
                 d3 = residual_convLSTM2D_block(d3,r_filters,num_class,rd=re_dropout)  
                                  
         outputs = Activation("softmax", name = 'softmax')(d3)
+        
+        # Optionally use sigmoid activation.
+        # outputs = Activation("sigmoid", name = 'sigmoid')(d3)       
 
         model = Model(inputs, outputs, name='Res-CRD-Net')
 
@@ -197,6 +203,9 @@ def Very_Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
         # d7 = Add()([d1, d2, d3, d4, d5, d6, d7])
       
         outputs = Activation("softmax", name = 'softmax')(d7)
+       
+        # Optionally use sigmoid activation.
+        # outputs = Activation("sigmoid", name = 'sigmoid')(d7)       
 
         model = Model(inputs, outputs, name='Res-CRD-Net')
 
