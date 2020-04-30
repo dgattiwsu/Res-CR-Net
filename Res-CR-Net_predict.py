@@ -115,7 +115,10 @@ for ind in np.arange(x_val.shape[0]):
     r = result[ind]*class_threshold     
 
     y = np.sum(y,axis=2)
-    r = np.sum(r,axis=2)      
+    r = np.sum(r,axis=2)
+    
+    # Correction for r if using sigmoid instead of softmax activation 
+    r[r>255] = 255      
     
     print(x.shape,y.shape,r.shape)
     
