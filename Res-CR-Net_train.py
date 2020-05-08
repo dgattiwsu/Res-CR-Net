@@ -60,7 +60,7 @@ model = ResNet_Atrous()
 print('ResNet_Atrous model selected')
 
 # model = Dense_ResNet_Atrous()
-# print('ResNet_Atrous model selected')
+# print('Dense_ResNet_Atrous model selected')
 
 # In[5]
 
