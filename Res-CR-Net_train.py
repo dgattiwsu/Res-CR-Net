@@ -18,11 +18,12 @@ import cv2
 from MODULES.Generators import train_generator_1, val_generator_1
 from MODULES.Generators import train_generator_2, val_generator_2
 from MODULES.Networks import ResNet_Atrous, Dense_ResNet_Atrous
+from MODULES.Networks import ResUNet, ResUNet_Big, ResUNet_CR, ResUNet_CR_Big
 from MODULES.Losses import dice_coeff
 from MODULES.Losses import tani_loss, tani_coeff, weighted_tani_coeff
 from MODULES.Losses import weighted_tani_loss, other_metrics
 from MODULES.Constants import _Params
-from MODULES.Utils import get_class_threshold
+from MODULES.Utils import get_class_threshold, get_model_memory_usage
 import tensorflow as tf 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import model_from_json 
@@ -56,19 +57,82 @@ model_number = str(datetime.datetime.now())[0:10] + '_' + \
                str(datetime.datetime.now())[11:13] + '_' + \
                str(datetime.datetime.now())[14:16]
 
-model = ResNet_Atrous()
-print('ResNet_Atrous model selected')
+NEW_RUN = True # or False if running from checkpoint
 
-# model = Dense_ResNet_Atrous()
-# print('Dense_ResNet_Atrous model selected')
+# In[5]:
+    
+if NEW_RUN:
+    
+    model_number = str(datetime.datetime.now())[0:10] + '_' + \
+                   str(datetime.datetime.now())[11:13] + '_' + \
+                   str(datetime.datetime.now())[14:16]
 
-# In[5]
+    model = ResNet_Atrous()
+    print('Res-CR-Net model selected')
 
+    # model = Dense_ResNet_Atrous()
+    # print('Dense Res-CR-Net model selected')
+
+    # model = ResUNet()
+    # print('4-levels Res-U-Net model selected')
+
+    # model = ResUNet_Big()
+    # print('6-levels Res-U-Net model selected')
+
+    # model = ResUNet_CR()
+    # print('4-levels Res-UR-Net model selected')
+
+    # model = ResUNet_CR_Big()
+    # print('6-levels Res-UR-Net model selected')    
+
+    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])       
+    
+else:
+
+    model_selection = 'model_' + str(NF) + 'F_' + str(NR1) + 'R1_' + str(NR2) + 'R2'
+    model_number = '2020-06-08_21_59' # Enter here the model number from an earlier run
+    
+    load_saved = True
+    load_best = True # or False
+
+    if load_saved:
+        # read in 
+        json_file = open('models/' + model_selection + '_' + model_number + '.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)       
+        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        
+        # load weights into new model
+        if load_best:
+            model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
+        else:
+            model.load_weights('models/' + model_selection + '_' + model_number + '_weights.h5')
+
+    # Get new model number
+    model_number = str(datetime.datetime.now())[0:10] + '_' + \
+                   str(datetime.datetime.now())[11:13] + '_' + \
+                   str(datetime.datetime.now())[14:16]
+
+# In[6]:
 # ### SUMMARY
 
 model.summary()
 
-# In[6]
+# Here we get the total memory requirements. Even if this total memory 
+# is available among all processors, individual tensors may 
+# still run the network out of resources on individual processors.
+
+# trainable_count, non_trainable_count, gbytes, mbytes = \
+# get_model_memory_usage(TRAIN_SIZE, model)
+# print("\n")
+# print(f'training batch total memory: {gbytes} gbytes, {mbytes} mbytes')
+
+# trainable_count, non_trainable_count, gbytes, mbytes = \
+# get_model_memory_usage(VAL_SIZE, model)
+# print(f'validation batch total memory: {gbytes} gbytes, {mbytes} mbytes')
+
+# In[7]
 # Save architecture without weights as h5
 model.save('models/' + model_selection + '_' + model_number + '.h5')
 
@@ -77,48 +141,13 @@ model_json = model.to_json()
 with open('models/' + model_selection + '_' + model_number + '.json', "w") as json_file:
     json_file.write(model_json) 
 
-# In[7]
+# In[8]
 
 # ### MODEL GRAPH
 from tensorflow.keras.utils import plot_model
 plot_model(model, show_shapes=True,\
            show_layer_names=False,\
            to_file='saved_images/' + model_selection + '_' + model_number + '_architecture.png') 
-
-# In[8]:
-    
-# # ### LOADING FROM CHECKPOINT
-
-# model_number = '2020-03-27_11_18'   
-# load_saved = True
-# load_best = True
-
-# if load_saved:
-#     # read in 
-#     json_file = open('models/' + model_selection + '_' + model_number + '.json', 'r')
-#     loaded_model_json = json_file.read()
-#     json_file.close()
-#     model = model_from_json(loaded_model_json)
-#     # load weights into new model
-#     if load_best:
-#         model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
-#     else:
-#         model.load_weights('models/' + model_selection + '_' + model_number + '_weights.h5')
-        
-# # Get new model number if appropriate and save the model  
-# model_number = str(datetime.datetime.now())[0:10] + '_' + \
-#                 str(datetime.datetime.now())[11:13] + '_' + \
-#                 str(datetime.datetime.now())[14:16] 
-
-# # Save architecture as json
-# model_json = model.to_json()
-# with open('models/' + model_selection + '_' + model_number + '.json', "w") as json_file:
-#     json_file.write(model_json)
-        
-# ### COMPILATION/EVALUATION
-# model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])    
-# test_scores=model.evaluate(val_generator(),steps=1)  
-# print('Validation score = ',test_scores) 
     
 # In[9]:
 
@@ -230,7 +259,7 @@ print('Validation score = ',test_scores)
 
 # model_number = '2020-04-03_16_59'   
 load_saved = True
-load_best = True
+load_best = False # if taking the model from the last epoch or True if taking the checkpoint model. 
 
 if load_saved:
     # read in 
