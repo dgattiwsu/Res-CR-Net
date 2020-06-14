@@ -9,6 +9,8 @@ Created on Mon Apr 13 09:51:48 2020
 # In[1]
 import numpy as np
 import copy
+import tensorflow as tf
+from tensorflow.keras import backend as K
 
 # In[2]
 def overlay_mask(image_layer,mask_layer,channel,fraction):
