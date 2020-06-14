@@ -119,9 +119,7 @@ else:
 
 model.summary()
 
-# Here we get the total memory requirements. Even if this total memory 
-# is available among all processors, individual tensors may 
-# still run the network out of resources on individual processors.
+# Here we get the total memory requirements. 
 
 # trainable_count, non_trainable_count, gbytes, mbytes = \
 # get_model_memory_usage(TRAIN_SIZE, model)
