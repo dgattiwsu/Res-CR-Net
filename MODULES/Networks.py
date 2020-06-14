@@ -59,12 +59,21 @@ def ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
             # d1 = Dropout(0.1)(d1)
             d1 = SpatialDropout2D(sp_dropout)(d1)
         
-        for cycle in range(resblock2):
-            if cycle == 0:
-                d2 = residual_convLSTM2D_block(d1,r_filters,num_class,rd=re_dropout)
-            else:
-                d2 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout) 
-      
+        # for cycle in range(resblock2):
+        #     if cycle == 0:
+        #         d2 = residual_convLSTM2D_block(d1,r_filters,num_class,rd=re_dropout)
+        #     else:
+        #         d2 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout) 
+                
+        if resblock2 > 0:
+            for cycle in range(resblock2):
+                if cycle == 0:
+                    d2 = residual_convLSTM2D_block(d1,r_filters,num_class,rd=re_dropout)
+                else:
+                    d2 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout) 
+        else:
+            d2 = shrink_block(d1,num_class)
+                                 
         outputs = Activation("softmax", name = 'softmax')(d2)
        
         # Optionally use sigmoid activation.
@@ -72,7 +81,7 @@ def ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
 
         model = Model(inputs, outputs, name='Res-CR-Net')
 
-        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
 
     return model
 
@@ -115,18 +124,27 @@ def Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
                     d2 += dsum
                     dsum = d2 + 0                                                          
 
-        for cycle in range(resblock2):
-            if cycle == 0:
-                d3 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout)
-            else:
-                d3 = residual_convLSTM2D_block(d3,r_filters,num_class,rd=re_dropout)  
+        # for cycle in range(resblock2):
+        #     if cycle == 0:
+        #         d3 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout)
+        #     else:
+        #         d3 = residual_convLSTM2D_block(d3,r_filters,num_class,rd=re_dropout) 
+                
+        if resblock2 > 0:
+            for cycle in range(resblock2):
+                if cycle == 0:
+                    d3 = residual_convLSTM2D_block(d2,r_filters,num_class,rd=re_dropout)
+                else:
+                    d3 = residual_convLSTM2D_block(d3,r_filters,num_class,rd=re_dropout) 
+        else:
+            d3 = shrink_block(d2,num_class)     
                                  
         outputs = Activation("softmax", name = 'softmax')(d3)
         
         # Optionally use sigmoid activation.
         # outputs = Activation("sigmoid", name = 'sigmoid')(d3)       
 
-        model = Model(inputs, outputs, name='Res-CRD-Net')
+        # model = Model(inputs, outputs, name='Res-CRD-Net')
 
         model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
 
@@ -209,7 +227,252 @@ def Very_Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
 
         model = Model(inputs, outputs, name='Res-CRD-Net')
 
-        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
 
     return model
+   
+# In[6]:
+    
+# ### Res-UR-NET
+    
+def ResUNet_CR(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
+    f = [16, 32, 64, 128, 256]
+    
+#   tf.debugging.set_log_device_placement(True)
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        
+        inputs = Input(shape=input_shape)
+        
+        ## Encoder    
+        # e0 = select(inputs,0)
+        e1 = stem_split(inputs, f[0])
+        e2 = residual_block_split(e1, f[1], strides=2)
+        e3 = residual_block_split(e2, f[2], strides=2)
+        e4 = residual_block_split(e3, f[3], strides=2)
+        e5 = residual_block_split(e4, f[4], strides=2)
+        
+        ## Bridge
+        # b0 = conv_block(e5, f[4], strides=1)
+        # b1 = conv_block(b0, f[4], strides=1)
+        b1 = residual_block(e5, f[4])
+        
+        ## Decoder
+        u1 = upsample_concat_block(b1, e4)
+        d1 = residual_block_split(u1, f[4])
+        
+        u2 = upsample_concat_block(d1, e3)
+        d2 = residual_block_split(u2, f[3])
+        
+        u3 = upsample_concat_block(d2, e2)
+        d3 = residual_block_split(u3, f[2])
+        
+        u4 = upsample_concat_block(d3, e1)
+        d4 = residual_block_split(u4, f[1])
+        
+        # d5 = SeparableConv2D(num_class, (3, 3), padding="same", activation="relu", 
+        #                      depthwise_initializer=he_normal(seed=5),
+        #                      pointwise_initializer=he_normal(seed=5), 
+        #                      bias_initializer='zeros')(d4)    
+        
+        d5 = Conv2D(num_class, (1, 1), padding="same", activation="relu", 
+                    kernel_initializer=he_normal(seed=5), 
+                    bias_initializer='zeros')(d4)     
+    
+        d6 = convLSTM2D_block(d5,1,num_class)
+            
+        outputs = Activation("softmax", name = 'softmax')(d6)
+    
+        model = Model(inputs, outputs, name='ResURNet')
+        
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+    
+    return model
+
+# In[7]:
+
+# ### RES-UR-NET BIG
+    
+def ResUNet_CR_Big(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
+    f = [16, 32, 64, 128, 256, 512, 1024]
+    
+#   tf.debugging.set_log_device_placement(True)
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        
+        inputs = Input(shape=input_shape)
+        
+        ## Encoder
+        # e0 = select(inputs,0)
+        e1 = stem_split(inputs, f[0])
+        e2 = residual_block_split(e1, f[1], strides=2)
+        e3 = residual_block_split(e2, f[2], strides=2)
+        e4 = residual_block_split(e3, f[3], strides=2)
+        e5 = residual_block_split(e4, f[4], strides=2)
+        e6 = residual_block_split(e5, f[5], strides=2)
+        e7 = residual_block_split(e6, f[6], strides=2)
+        
+        ## Bridge
+        b0 = conv_block(e7, f[6], strides=1)
+        b1 = conv_block(b0, f[6], strides=1)
+        
+        ## Decoder
+        u1 = upsample_concat_block(b1, e6)
+        d1 = residual_block_split(u1, f[6])
+    
+        u2 = upsample_concat_block(d1, e5)
+        d2 = residual_block_split(u2, f[5])
+        
+        u3 = upsample_concat_block(d2, e4)
+        d3 = residual_block_split(u3, f[4])
+        
+        u4 = upsample_concat_block(d3, e3)
+        d4 = residual_block_split(u4, f[3])
+    
+        u5 = upsample_concat_block(d4, e2)
+        d5 = residual_block_split(u5, f[2])
+    
+        u6 = upsample_concat_block(d5, e1)
+        d6 = residual_block_split(u6, f[1])
+    
+        # d7 = SeparableConv2D(num_class, (3, 3), padding="same", activation="relu", 
+        #                      depthwise_initializer=he_normal(seed=5),
+        #                      pointwise_initializer=he_normal(seed=5), 
+        #                      bias_initializer='zeros')(d6)
+        
+        d7 = Conv2D(num_class, (1, 1), padding="same", activation="relu", 
+                    kernel_initializer=he_normal(seed=5), 
+                    bias_initializer='zeros')(d6)
+    
+        d8 = convLSTM2D_block(d7,1,num_class)
+    
+        outputs = Activation("softmax", name = 'softmax')(d8)
+        
+        model = Model(inputs, outputs,name='ResURNet_Big')
+        
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])    
+    
+    return model
+
+# In[8]:
+    
+# ### Res-U-NET 
+    
+def ResUNet(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
+    f = [16, 32, 64, 128, 256]
+    
+#   tf.debugging.set_log_device_placement(True)
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        
+        inputs = Input(shape=input_shape)
+        
+        ## Encoder    
+        # e0 = select(inputs,0)
+        e1 = stem_split(inputs, f[0])
+        e2 = residual_block_split(e1, f[1], strides=2)
+        e3 = residual_block_split(e2, f[2], strides=2)
+        e4 = residual_block_split(e3, f[3], strides=2)
+        e5 = residual_block_split(e4, f[4], strides=2)
+        
+        ## Bridge
+        # b0 = conv_block(e5, f[4], strides=1)
+        # b1 = conv_block(b0, f[4], strides=1)
+        b1 = residual_block(e5, f[4])
+        
+        ## Decoder
+        u1 = upsample_concat_block(b1, e4)
+        d1 = residual_block_split(u1, f[4])
+        
+        u2 = upsample_concat_block(d1, e3)
+        d2 = residual_block_split(u2, f[3])
+        
+        u3 = upsample_concat_block(d2, e2)
+        d3 = residual_block_split(u3, f[2])
+        
+        u4 = upsample_concat_block(d3, e1)
+        d4 = residual_block_split(u4, f[1])
+        
+        # d5 = SeparableConv2D(num_class, (3, 3), padding="same", activation="relu", 
+        #                      depthwise_initializer=he_normal(seed=5),
+        #                      pointwise_initializer=he_normal(seed=5), 
+        #                      bias_initializer='zeros')(d4)
+        
+        d5 = Conv2D(num_class, (1, 1), padding="same", activation="relu", 
+                    kernel_initializer=he_normal(seed=5), 
+                    bias_initializer='zeros')(d4)         
+        
+        outputs = Activation("softmax", name = 'softmax')(d5)
+    
+        model = Model(inputs, outputs, name='ResUNet')
+        
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+    
+    return model
+
+# In[9]:
+
+# ### RES-U-NET-BIG
+    
+def ResUNet_Big(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
+    f = [16, 32, 64, 128, 256, 512, 1024]
+    
+#   tf.debugging.set_log_device_placement(True)
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        
+        inputs = Input(shape=input_shape)
+        
+        ## Encoder
+        # e0 = select(inputs,0)
+        e1 = stem_split(inputs, f[0])
+        e2 = residual_block_split(e1, f[1], strides=2)
+        e3 = residual_block_split(e2, f[2], strides=2)
+        e4 = residual_block_split(e3, f[3], strides=2)
+        e5 = residual_block_split(e4, f[4], strides=2)
+        e6 = residual_block_split(e5, f[5], strides=2)
+        e7 = residual_block_split(e6, f[6], strides=2)
+        
+        ## Bridge
+        b0 = conv_block(e7, f[6], strides=1)
+        b1 = conv_block(b0, f[6], strides=1)
+        
+        ## Decoder
+        u1 = upsample_concat_block(b1, e6)
+        d1 = residual_block_split(u1, f[6])
+    
+        u2 = upsample_concat_block(d1, e5)
+        d2 = residual_block_split(u2, f[5])
+        
+        u3 = upsample_concat_block(d2, e4)
+        d3 = residual_block_split(u3, f[4])
+        
+        u4 = upsample_concat_block(d3, e3)
+        d4 = residual_block_split(u4, f[3])
+    
+        u5 = upsample_concat_block(d4, e2)
+        d5 = residual_block_split(u5, f[2])
+    
+        u6 = upsample_concat_block(d5, e1)
+        d6 = residual_block_split(u6, f[1])
+    
+        # d7 = SeparableConv2D(num_class, (3, 3), padding="same", activation="relu", 
+        #                      depthwise_initializer=he_normal(seed=5),
+        #                      pointwise_initializer=he_normal(seed=5), 
+        #                      bias_initializer='zeros')(d6)
+        
+        d7 = Conv2D(num_class, (1, 1), padding="same", activation="relu", 
+                    kernel_initializer=he_normal(seed=5), 
+                    bias_initializer='zeros')(d6)
+    
+        d8 = convLSTM2D_block(d7,1,num_class)
+    
+        outputs = Activation("softmax", name = 'softmax')(d8)
+        
+        model = Model(inputs, outputs,name='ResUNet_Big')
+        
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])    
+    
+    return model
+
 
