@@ -102,3 +102,17 @@ def get_class_threshold(NUM_CLASS):
         jump = round(step*i)
         class_threshold.append(jump)
     return class_threshold
+
+def get_model_memory_usage(batch_size, model):
+    shapes_mem_count = 0
+    for layer in model.layers:
+        shapes_mem_count += np.prod(layer.output_shape[1:])
+        
+    trainable_count = int(np.sum([K.count_params(weight) for weight in model.trainable_weights]))
+    non_trainable_count = int(np.sum([K.count_params(weight) for weight in model.non_trainable_weights]))
+
+    total_memory = 4*batch_size*(shapes_mem_count + trainable_count + non_trainable_count)
+    gbytes = round(total_memory / (1024 ** 3), 3)
+    mbytes = round(total_memory / (1024 ** 2), 3)
+    
+    return trainable_count, non_trainable_count, gbytes, mbytes
