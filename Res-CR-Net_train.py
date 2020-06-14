@@ -57,7 +57,7 @@ model_number = str(datetime.datetime.now())[0:10] + '_' + \
                str(datetime.datetime.now())[11:13] + '_' + \
                str(datetime.datetime.now())[14:16]
 
-NEW_RUN = True # or False if running from checkpoint
+NEW_RUN = True # or False if running from checkpoint or the end of a previous run.
 
 # In[5]:
     
