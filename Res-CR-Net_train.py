@@ -128,14 +128,14 @@ model.summary()
 
 # Here we get the total memory requirements. 
 
-# trainable_count, non_trainable_count, gbytes, mbytes = \
-# get_model_memory_usage(TRAIN_SIZE, model)
-# print("\n")
-# print(f'training batch total memory: {gbytes} gbytes, {mbytes} mbytes')
+trainable_count, non_trainable_count, gbytes, mbytes = \
+get_model_memory_usage(TRAIN_SIZE, model)
+print("\n")
+print(f'training batch total memory: {gbytes} gbytes, {mbytes} mbytes')
 
-# trainable_count, non_trainable_count, gbytes, mbytes = \
-# get_model_memory_usage(VAL_SIZE, model)
-# print(f'validation batch total memory: {gbytes} gbytes, {mbytes} mbytes')
+trainable_count, non_trainable_count, gbytes, mbytes = \
+get_model_memory_usage(VAL_SIZE, model)
+print(f'validation batch total memory: {gbytes} gbytes, {mbytes} mbytes')
 
 # In[7]
 # Save architecture without weights as h5
