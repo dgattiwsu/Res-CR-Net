@@ -100,9 +100,16 @@ else:
         json_file = open('models/' + model_selection + '_' + model_number + '.json', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
-        model = model_from_json(loaded_model_json)       
-        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
         
+        # model = model_from_json(loaded_model_json)       
+        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        
+        # The following allows the loaded model to be optimized for multiple GPUs.
+        strategy = tf.distribute.MirroredStrategy()
+        with strategy.scope():
+            model = model_from_json(loaded_model_json)
+            model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+                        
         # load weights into new model
         if load_best:
             model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
