@@ -81,8 +81,6 @@ def ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
 
         model = Model(inputs, outputs, name='Res-CR-Net')
 
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
-
     return model
 
 # In[4]:    
@@ -144,9 +142,7 @@ def Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
         # Optionally use sigmoid activation.
         # outputs = Activation("sigmoid", name = 'sigmoid')(d3)       
 
-        # model = Model(inputs, outputs, name='Res-CRD-Net')
-
-        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        model = Model(inputs, outputs, name='Res-CRD-Net')
 
     return model
       
@@ -225,9 +221,7 @@ def Very_Dense_ResNet_Atrous(input_shape=(HEIGHT, WIDTH, CHANNELS),
         # Optionally use sigmoid activation.
         # outputs = Activation("sigmoid", name = 'sigmoid')(d7)       
 
-        model = Model(inputs, outputs, name='Res-CRD-Net')
-
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        model = Model(inputs, outputs, name='Res-CRVD-Net')
 
     return model
    
@@ -284,8 +278,6 @@ def ResUNet_CR(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
         outputs = Activation("softmax", name = 'softmax')(d6)
     
         model = Model(inputs, outputs, name='Res-UR-Net')
-        
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
     
     return model
 
@@ -348,9 +340,7 @@ def ResUNet_CR_Big(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
     
         outputs = Activation("softmax", name = 'softmax')(d8)
         
-        model = Model(inputs, outputs,name='Res-UR-Net_Big')
-        
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])    
+        model = Model(inputs, outputs,name='Res-UR-Net_Big')   
     
     return model
 
@@ -404,9 +394,7 @@ def ResUNet(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
         
         outputs = Activation("softmax", name = 'softmax')(d5)
     
-        model = Model(inputs, outputs, name='Res-U-Net')
-        
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+        model = Model(inputs, outputs, name='Res-U-Net')        
     
     return model
 
@@ -469,9 +457,7 @@ def ResUNet_Big(input_shape=(HEIGHT, WIDTH, CHANNELS),num_class=NUM_CLASS):
     
         outputs = Activation("softmax", name = 'softmax')(d8)
         
-        model = Model(inputs, outputs,name='Res-U-Net_Big')
-        
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])    
+        model = Model(inputs, outputs,name='Res-U-Net_Big')           
     
     return model
 
