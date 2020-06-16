@@ -72,6 +72,9 @@ if NEW_RUN:
 
     # model = Dense_ResNet_Atrous()
     # print('Dense Res-CR-Net model selected')
+    
+    # model = Very_Dense_ResNet_Atrous()
+    # print('Very Dense Res-CR-Net model selected')
 
     # model = ResUNet()
     # print('4-levels Res-U-Net model selected')
