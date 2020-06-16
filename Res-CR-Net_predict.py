@@ -17,12 +17,13 @@ import cv2
 
 from MODULES.Generators import train_generator_1, val_generator_1
 from MODULES.Generators import train_generator_2, val_generator_2
-from MODULES.Networks import ResNet_Atrous
+from MODULES.Networks import ResNet_Atrous, Dense_ResNet_Atrous, Very_Dense_ResNet_Atrous
+from MODULES.Networks import ResUNet, ResUNet_Big, ResUNet_CR, ResUNet_CR_Big
 from MODULES.Losses import dice_coeff
 from MODULES.Losses import tani_loss, tani_coeff, weighted_tani_coeff
 from MODULES.Losses import weighted_tani_loss, other_metrics
 from MODULES.Constants import _Params
-from MODULES.Utils import get_class_threshold
+from MODULES.Utils import get_class_threshold, get_model_memory_usage
 import tensorflow as tf 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import model_from_json 
@@ -41,9 +42,6 @@ HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
                 
 model_selection = 'model_' + str(NF) + 'F_' + str(NR1) + 'R1_' + str(NR2) + 'R2'
 
-model = ResNet_Atrous()
-print('ResNet_Atrous model selected')
-
 # In[4]:
     
 # ### LOADING/COMPILATION
@@ -57,7 +55,12 @@ if load_saved:
     json_file = open('models/' + model_selection + '_' + model_number + '.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
-    model = model_from_json(loaded_model_json)
+        
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        model = model_from_json(loaded_model_json)
+        model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])        
+        
     # load weights into new model
     if load_best:
         model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
@@ -67,7 +70,7 @@ if load_saved:
 # In[5]
     
 # ### EVALUATION
-model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+
 if len(CLASSES) == 1:
     test_scores=model.evaluate(val_generator_1(),steps=1)
 elif len(CLASSES) > 1:
