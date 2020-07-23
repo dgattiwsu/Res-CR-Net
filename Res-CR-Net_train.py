@@ -15,8 +15,8 @@ import cv2
 
 # In[2]:
 
-from MODULES.Generators import train_generator_1, val_generator_1
-from MODULES.Generators import train_generator_2, val_generator_2
+from MODULES.Generators import train_generator_1, val_generator_1, test_generator_1
+from MODULES.Generators import train_generator_2, val_generator_2, test_generator_2
 from MODULES.Networks import ResNet_Atrous, Dense_ResNet_Atrous
 from MODULES.Networks import ResUNet, ResUNet_Big, ResUNet_CR, ResUNet_CR_Big
 from MODULES.Losses import dice_coeff
@@ -30,6 +30,10 @@ from tensorflow.keras.models import model_from_json
 from tensorflow.python.client import device_lib
 import matplotlib.pyplot as plt
 import datetime
+
+# automatic reload of external definitions if changed during testing (ipython)
+# %load_ext autoreload
+# %autoreload 2
 
 # In[3]:
 
@@ -49,7 +53,10 @@ print(local_device_protos)
 # ### MODEL SELECTION
 HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
     KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-    TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params() 
+    TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+
+TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
+    VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
 
 model_selection = 'model_' + str(NF) + 'F_' + str(NR1) + 'R1_' + str(NR2) + 'R2'
 
@@ -58,6 +65,7 @@ model_number = str(datetime.datetime.now())[0:10] + '_' + \
                str(datetime.datetime.now())[14:16]
 
 NEW_RUN = True # or False if running from checkpoint or the end of a previous run.
+NEW_MODEL_NUMBER = False
 
 # In[5]:
     
@@ -88,24 +96,25 @@ if NEW_RUN:
     # model = ResUNet_CR_Big()
     # print('6-levels Res-UR-Net model selected')    
 
-    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])       
+    model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
+    
+    print(model.name + ' model selected')
+    
+    initial_epoch = 0
     
 else:
 
     model_selection = 'model_' + str(NF) + 'F_' + str(NR1) + 'R1_' + str(NR2) + 'R2'
-    model_number = '2020-06-08_21_59' # Enter here the model number from an earlier run
+    model_number = '2020-07-21_14_55' # Enter here the model number from an earlier run
     
     load_saved = True
-    load_best = True # or False
+    load_best = False # or False
 
     if load_saved:
         # read in 
         json_file = open('models/' + model_selection + '_' + model_number + '.json', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
-        
-        # model = model_from_json(loaded_model_json)       
-        # model.compile(optimizer=Adam(), loss=weighted_tani_loss, metrics=[tani_coeff])
         
         # The following allows the loaded model to be optimized for multiple GPUs.
         strategy = tf.distribute.MirroredStrategy()
@@ -117,16 +126,25 @@ else:
         if load_best:
             model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
         else:
-            model.load_weights('models/' + model_selection + '_' + model_number + '_weights.h5')
-
+            model.load_weights('models/last_' + model_selection + '_' + model_number + '_weights.h5')
+        
+        # read csv history file and get last epoch
+        csv_df = pd.read_csv('models/' + model_selection + '_' + model_number + '_history.csv')            
+        initial_epoch = csv_df['epoch'].index[-1]
+        
     # Get new model number
-    model_number = str(datetime.datetime.now())[0:10] + '_' + \
-                   str(datetime.datetime.now())[11:13] + '_' + \
-                   str(datetime.datetime.now())[14:16]
+    if NEW_MODEL_NUMBER:
+        model_number = str(datetime.datetime.now())[0:10] + '_' + \
+                       str(datetime.datetime.now())[11:13] + '_' + \
+                       str(datetime.datetime.now())[14:16]
+        initial_epoch = 0
+    
+    print(model.name + ' model selected')    
 
 # In[6]:
 # ### SUMMARY
 
+print(model_selection,model_number)
 model.summary()
 
 # Here we get the total memory requirements. 
@@ -158,9 +176,16 @@ plot_model(model, show_shapes=True,\
            to_file='saved_images/' + model_selection + '_' + model_number + '_architecture.png') 
     
 # In[9]:
-
 # ### CALLBACKS
-               
+
+# Choose which model to save
+save_best=True
+
+if save_best:
+    savefilepath='models/best_' + model_selection + '_' + model_number + '_weights.h5'
+else:
+    savefilepath='models/last_' + model_selection + '_' + model_number + '_weights.h5'
+                   
 # Quiery the current directory
 pwd = os.getcwd()
 os.system('mkdir log_dir')
@@ -186,23 +211,26 @@ callbacks_list = [
 # callback for early stopping     
     tf.keras.callbacks.EarlyStopping( 
         monitor='val_loss', 
-        patience=60, 
-#         verbose=1, 
+        patience=200, 
+        # verbose=1, 
         min_delta = 0.001,
         mode='min'),
 
-# callback to save best model (here we save only the weights because the 
+# callback to save best or last model (here we save only the weights because the 
 # dice coef loss is not stored in the model)    
     tf.keras.callbacks.ModelCheckpoint( 
-        filepath='models/best_' + model_selection + '_' + model_number + '_weights.h5',
-        monitor='val_loss', save_best_only=True,
+        filepath=savefilepath,  
+        monitor='val_loss', 
+        save_best_only=save_best,      
         mode = 'min', 
-#         verbose = 1,
+        # verbose = 1,
         save_weights_only = True)]
-   
+      
 # In[10]:
 
-# ### TRAINING   
+# ### TRAINING
+
+print(CLASSES)
 
 epoch_num = 90
 train_steps = 30 # Number of batches called in each epoch
@@ -214,6 +242,7 @@ if len(CLASSES) == 1:
                         steps_per_epoch=train_steps, 
                         validation_steps=val_steps, 
                         epochs=epoch_num,
+                        initial_epoch=initial_epoch,
                         callbacks = callbacks_list)
 elif len(CLASSES) > 1:
     history = model.fit(train_generator_2(), 
@@ -221,6 +250,7 @@ elif len(CLASSES) > 1:
                         steps_per_epoch=train_steps, 
                         validation_steps=val_steps, 
                         epochs=epoch_num,
+                        initial_epoch=initial_epoch,
                         callbacks = callbacks_list)    
  
 # In[11]:
