@@ -20,7 +20,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 # CLASS_THRESHOLD      
 HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
     KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-    TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+    TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
 
 step = 255/(NUM_CLASS-1)
 class_threshold = []
@@ -86,12 +86,12 @@ def train_generator_1():
     # ### CONSTANTS       
     HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
         KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
         
     TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
-        VAL_MSK_PATH, VAL_MSK_CLASS = _Paths()
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
         
-    TRAIN_SEED, VAL_SEED = _Seeds()
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()   
         
     train_data_gen_img_args = dict(rescale=1./255,
                                  horizontal_flip=True,
@@ -163,12 +163,12 @@ def val_generator_1():
     # ### CONSTANTS     
     HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
         KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
         
     TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
-        VAL_MSK_PATH, VAL_MSK_CLASS = _Paths()
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
         
-    TRAIN_SEED, VAL_SEED = _Seeds()    
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()    
     
     val_data_gen_img_args = dict(rescale=1./255)
     
@@ -206,7 +206,61 @@ def val_generator_1():
         elif MSK_COLOR_MODE == 'grayscale':
             yield(val_image_generator.next(), to_one_hot_val(val_mask_generator.next(), \
                 VAL_SIZE,HEIGHT,WIDTH,NUM_CLASS))
+
+# In[5]
+
+# ### TEST SET
+def test_generator_1():
+
+    # ### CONSTANTS     
+    HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
+        KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+        
+    TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
+        
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()    
+    
+    test_data_gen_img_args = dict(rescale=1./255)
+    
+    if MSK_COLOR_MODE == 'rgb':
+        test_data_gen_msk_args = dict(rescale=1./255)
+        
+    elif MSK_COLOR_MODE == 'grayscale':
+        test_data_gen_msk_args = dict(preprocessing_function=to_test_indices)
+    
+    test_image_datagen = ImageDataGenerator(**test_data_gen_img_args)
+    test_mask_datagen = ImageDataGenerator(**test_data_gen_msk_args)
+    
+    
+    test_image_generator = test_image_datagen.flow_from_directory(TEST_IMG_PATH,
+                                           target_size=(HEIGHT,WIDTH),
+                                           classes=[IMG_CLASS],
+                                           color_mode=IMG_COLOR_MODE,                     
+                                           class_mode=None,
+                                           batch_size=TEST_SIZE,
+                                           shuffle=False,
+                                           seed=TEST_SEED)
+    
+    test_mask_generator = test_mask_datagen.flow_from_directory(TEST_MSK_PATH,
+                                           target_size=(HEIGHT,WIDTH),
+                                           classes=CLASSES,
+                                           color_mode=MSK_COLOR_MODE,
+                                           class_mode=None,
+                                           batch_size=TEST_SIZE,
+                                           shuffle=False,
+                                           seed=TEST_SEED)
+
+    while True:
+        if MSK_COLOR_MODE == 'rgb':
+            yield(test_image_generator.next(), test_mask_generator.next())
+        elif MSK_COLOR_MODE == 'grayscale':
+            yield(test_image_generator.next(), to_one_hot_val(test_mask_generator.next(), \
+                TRAIN_SIZE,HEIGHT,WIDTH,NUM_CLASS))
                 
+           
+            
 # In[5]
 
 # ### TRAINING SET for multiple masks            
@@ -217,12 +271,12 @@ def train_generator_2():
     # ### CONSTANTS       
     HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
         KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
         
     TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
-        VAL_MSK_PATH, VAL_MSK_CLASS = _Paths()
-    
-    TRAIN_SEED, VAL_SEED = _Seeds()
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
+        
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()    
         
     train_data_gen_img_args = dict(rescale=1./255,
                                  horizontal_flip=True,
@@ -286,12 +340,12 @@ def val_generator_2():
     # ### CONSTANTS     
     HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
         KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
         
     TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
-        VAL_MSK_PATH, VAL_MSK_CLASS = _Paths()
-    
-    TRAIN_SEED, VAL_SEED = _Seeds()    
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
+        
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()    
     
     val_data_gen_img_args = dict(rescale=1./255)
     val_data_gen_msk_args = dict(rescale=1./255)
@@ -329,4 +383,51 @@ def val_generator_2():
         # yield(val_image_generator.next(), \
         #       np.squeeze(np.stack([globals()['val_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3)))              
 
+  
+def test_generator_2():
+
+    # ### CONSTANTS     
+    HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
+        KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
         
+    TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS = _Paths()
+    
+    TRAIN_SEED, VAL_SEED, TEST_SEED = _Seeds()    
+    
+    test_data_gen_img_args = dict(rescale=1./255)
+    test_data_gen_msk_args = dict(rescale=1./255)
+            
+    test_image_datagen = ImageDataGenerator(**test_data_gen_img_args)
+    test_mask_datagen = ImageDataGenerator(**test_data_gen_msk_args)
+    
+    
+    test_image_generator = test_image_datagen.flow_from_directory(TEST_IMG_PATH,
+                                           target_size=(HEIGHT,WIDTH),
+                                           classes=[IMG_CLASS],
+                                           color_mode=IMG_COLOR_MODE,                     
+                                           class_mode=None,
+                                           batch_size=TEST_SIZE,
+                                           shuffle=False,
+                                           seed=TEST_SEED,
+                                           # save_to_dir='dataset/val_local/images/save',
+                                           )
+    
+    for i in range(NUM_CLASS):
+        globals()['test_mask_gen_{}'.format(i)] = test_mask_datagen.flow_from_directory(TEST_MSK_PATH,
+                                           target_size=(HEIGHT,WIDTH),
+                                           classes=[CLASSES[i]],
+                                           color_mode=MSK_COLOR_MODE,
+                                           class_mode=None,
+                                           batch_size=TEST_SIZE,
+                                           shuffle=False,
+                                           seed=TEST_SEED,
+                                           # save_to_dir='dataset/val_local/masks/save',
+                                           )
+    
+    while True:
+        yield(test_image_generator.next(), \
+              np.round(np.squeeze(np.stack([globals()['test_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3))))
+        # yield(val_image_generator.next(), \
+        #       np.squeeze(np.stack([globals()['val_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3)))              
