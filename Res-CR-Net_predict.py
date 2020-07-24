@@ -38,7 +38,7 @@ import datetime
 
 HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
     KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-    TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params() 
+    TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS = _Params()
                 
 model_selection = 'model_' + str(NF) + 'F_' + str(NR1) + 'R1_' + str(NR2) + 'R2'
 
@@ -65,7 +65,7 @@ if load_saved:
     if load_best:
         model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
     else:
-        model.load_weights('models/' + model_selection + '_' + model_number + '_weights.h5')
+        model.load_weights('models/last' + model_selection + '_' + model_number + '_weights.h5')      
     
 # In[5]
     
