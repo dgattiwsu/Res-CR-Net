@@ -261,7 +261,7 @@ def test_generator_1():
                 
            
             
-# In[5]
+# In[6]
 
 # ### TRAINING SET for multiple masks            
 def train_generator_2():
@@ -332,7 +332,9 @@ def train_generator_2():
               np.round(np.squeeze(np.stack([globals()['train_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3))))        
         # yield(train_image_generator.next(), \
         #       np.squeeze(np.stack([globals()['train_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3)))             
-# In[6]:
+
+
+# In[7]:
 
 # ### VALIDATION SET for multiple masks
 def val_generator_2():
@@ -383,7 +385,10 @@ def val_generator_2():
         # yield(val_image_generator.next(), \
         #       np.squeeze(np.stack([globals()['val_mask_gen_{}'.format(i)].next() for i in range(NUM_CLASS)],axis=3)))              
 
-  
+
+# In[8]:
+
+# ### VALIDATION SET for multiple masks
 def test_generator_2():
 
     # ### CONSTANTS     
