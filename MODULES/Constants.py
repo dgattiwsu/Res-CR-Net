@@ -109,6 +109,7 @@ def _Paths():
 def _Seeds():
     TRAIN_SEED = 1
     VAL_SEED = 2
-    return TRAIN_SEED, VAL_SEED
+    TEST_SEED = 3
+    return TRAIN_SEED, VAL_SEED, TEST_SEED
     
 # In[2]
