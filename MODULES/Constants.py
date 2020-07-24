@@ -86,20 +86,25 @@ def _Params():
     # Batch size for training and validation set
     TRAIN_SIZE = 10
     VAL_SIZE = 6
+    TEST_SIZE = 6
     
     return HEIGHT, WIDTH, CHANNELS, IMG_COLOR_MODE, MSK_COLOR_MODE, NUM_CLASS, \
         KS1, KS2, KS3, DL1, DL2, DL3, NF, NFL, NR1, NR2, DIL_MODE, W_MODE, LS, \
-        TRAIN_SIZE, VAL_SIZE, DR1, DR2, CLASSES, IMG_CLASS
+        TRAIN_SIZE, VAL_SIZE, TEST_SIZE, DR1, DR2, CLASSES, IMG_CLASS
 
 def _Paths():
     TRAIN_IMG_PATH = 'dataset/train_local/images'
     TRAIN_MSK_PATH = 'dataset/train_local/masks'
     VAL_IMG_PATH = 'dataset/val_local/images'
     VAL_MSK_PATH = 'dataset/val_local/masks'
+    TEST_IMG_PATH = 'dataset/test_local/images'
+    TEST_MSK_PATH = 'dataset/test_local/masks'    
     TRAIN_MSK_CLASS = ['msk']
     VAL_MSK_CLASS = ['msk']
+    TEST_MSK_CLASS = ['msk']
+
     return TRAIN_IMG_PATH, TRAIN_MSK_PATH, TRAIN_MSK_CLASS, VAL_IMG_PATH, \
-        VAL_MSK_PATH, VAL_MSK_CLASS
+        VAL_MSK_PATH, VAL_MSK_CLASS, TEST_IMG_PATH, TEST_MSK_PATH, TEST_MSK_CLASS
 
 def _Seeds():
     TRAIN_SEED = 1
