@@ -257,30 +257,42 @@ elif len(CLASSES) > 1:
 
 # ### SAVE WEIGHTS
 
+print(model_selection,model_number)
 model.save_weights('models/' + model_selection + '_' + model_number + '_weights' + '.h5')
 
 # In[12]:
 
 # ### HISTORY
 
-history.history.keys()
+csv_df = pd.read_csv('models/' + model_selection + '_' + model_number + '_history.csv')
+history_csv = csv_df[csv_df.columns[1:]].to_dict(orient='list')
+
 skip = 1
-loss_history = history.history['loss']
-dice_coeff_history = history.history['tani_coeff']
-val_loss_history = history.history['val_loss']
-val_dice_coeff_history = history.history['val_tani_coeff']
-epochs = range(0, len(loss_history) , skip) 
-plt.plot(epochs, loss_history[0::skip], '-', label='Training loss') 
-plt.plot(epochs, dice_coeff_history[0::skip], '-', label='Training Tani coef') 
-plt.plot(epochs, val_loss_history[0::skip], '--', label='Validation loss')
-plt.plot(epochs, val_dice_coeff_history[0::skip], '-r', label='Validation Tani coef')
-plt.title('Training and validation loss ') 
-plt.xlabel('Epochs') 
-plt.ylabel('Loss/Tani coefficient') 
-plt.legend()
-plt.grid()
-plt.gcf()
-plt.savefig('models/' + model_selection + '_' + model_number + '_history.png')
+loss_history_csv = history_csv['loss']
+acc_history_csv = history_csv['tani_coeff']
+val_loss_history_csv = history_csv['val_loss']
+val_acc_history_csv = history_csv['val_tani_coeff']
+epochs_csv = range(0, len(loss_history_csv) , skip)  
+
+fig, ax = plt.subplots(ncols=1, nrows=1,facecolor=(.8, .8, .8), figsize=[9,6])
+ax.set_facecolor('w')
+ax.plot(epochs_csv, loss_history_csv[0::skip], '-', label='Training loss') 
+ax.plot(epochs_csv, acc_history_csv[0::skip], '-', label='Training Tanimoto coeff') 
+ax.plot(epochs_csv, val_loss_history_csv[0::skip], '--', label='Validation loss')
+ax.plot(epochs_csv, val_acc_history_csv[0::skip], '-r', label='Validation Tanimoto coeff')
+ax.set_xlabel('Epochs')
+ax.set_ylabel('Loss/Tanimoto coefficient')
+ax.set_ylim([0,1.0])
+ax.grid(b=True, which='major', color=(.6, .6, .6), linestyle='-')
+ax.set_title('Training and validation loss ')
+ax.legend()
+
+plt.savefig('models/' + model_selection + '_' + model_number + '_history_csv.png')
+
+validation_minimum = np.argmin(val_loss_history_csv)
+print(f"Validation minimum reached at epoch {validation_minimum}")
+accuracy_maximum = np.argmax(val_acc_history_csv)
+print(f"Validation maximum reached at epoch {accuracy_maximum}")
 
 # In[13]:
 
@@ -309,7 +321,7 @@ if load_saved:
     if load_best:
         model.load_weights('models/best_' + model_selection + '_' + model_number + '_weights.h5')
     else:
-        model.load_weights('models/' + model_selection + '_' + model_number + '_weights.h5')
+        model.load_weights('models/last' + model_selection + '_' + model_number + '_weights.h5')
     
 # In[14]
     
@@ -321,7 +333,6 @@ elif len(CLASSES) > 1:
     test_scores=model.evaluate(val_generator_2(),steps=1)
     
 print('Validation score = ',test_scores)
-
 
 # In[15]
 
